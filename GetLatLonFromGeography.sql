@@ -1,0 +1,1 @@
+SELECT ST_XMax(latlon::GEOMETRY), ST_YMax(latlon::GEOMETRY) FROM all_cities WHERE geonameid = 4179320;
