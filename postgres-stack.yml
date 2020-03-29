@@ -1,0 +1,58 @@
+version: '3.2'
+
+services:
+  postgis:
+    image: 'postgis/postgis:latest'
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'postgis:/var/lib/postgresql/data'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data
+    networks:
+      - postgres-bridge
+      - postgres-overlay
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  
+  pgadmin4:
+    image: 'dpage/pgadmin4:latest'
+    ports: 
+      - '9095:9095'
+    volumes:
+        - 'pgadmin:/var/lib/pgadmin'
+    environment:
+      - PGADMIN_LISTEN_PORT=9095
+      - PGADMIN_DEFAULT_EMAIL=pgadmin@pgadmin.com
+      - PGADMIN_DEFAULT_PASSWORD=COmmand12!@
+    depends_on:
+      - postgis
+    networks:
+      - postgres-bridge
+      - postgres-overlay
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+volumes:
+  postgis:
+    driver: local
+  pgadmin:
+    driver: local
+
+networks:
+  postgres-bridge:
+    external:
+      name: bridge
+  postgres-overlay:
+    driver: overlay
+    attachable: true

@@ -1,0 +1,50 @@
+version: '3.2'
+
+services:
+  trucku-redis:
+    image: 'redis:latest'
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'trucku_redis_data:/data'
+    networks:
+      - redis-bridge
+      - redis-overlay
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  
+  redis-commander:
+    image: 'rediscommander/redis-commander:latest'
+    ports: 
+      - '6380:6380'
+    environment:
+      - PORT=6380
+      - REDIS_HOST=trucku-redis
+      - REDIS_PORT=6379
+    depends_on:
+      - trucku-redis
+    networks:
+      - redis-bridge
+      - redis-overlay
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+volumes:
+  trucku_redis_data:
+    driver: local
+
+networks:
+  redis-bridge:
+    external:
+      name: bridge
+  redis-overlay:
+    driver: overlay
+    attachable: true
